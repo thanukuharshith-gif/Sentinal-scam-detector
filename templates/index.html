@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SENTINAL — Scam & Phishing Detector</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    .auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box}.auth-card{width:min(440px,100%)}.auth-card h1{margin-bottom:8px}.subtitle{margin-bottom:24px;opacity:.78}.auth-form{display:grid;gap:14px}.auth-form label{font-weight:600}.auth-form input{width:100%;box-sizing:border-box}.password-wrap{position:relative}.password-wrap input{padding-right:76px}.toggle-password{position:absolute;right:8px;top:50%;transform:translateY(-50%)}.auth-error{min-height:20px;margin:2px 0;color:#c0392b;font-size:.92rem}.auth-demo{margin-top:18px;font-size:.85rem;opacity:.7;text-align:center}.app-header{display:flex;justify-content:space-between;align-items:center;gap:16px}.header-actions{display:flex;align-items:center;gap:10px}.user-chip{font-size:.9rem;opacity:.8}.secondary{border:1px solid currentColor;background:transparent}.hidden{display:none!important}body{margin:0}
+  </style>
+</head>
+<body>
+  <section id="loginScreen" class="auth-screen">
+    <div class="card auth-card">
+      <header class="hero">
+        <div class="badge">🛡️ SENTINAL</div>
+        <h1>Welcome back</h1>
+        <p class="subtitle">Sign in to use the Scam &amp; Phishing Detector.</p>
+      </header>
+      <form id="loginForm" class="auth-form" novalidate>
+        <div><label for="username">Username</label><input id="username" name="username" type="text" placeholder="Enter your username" autocomplete="username" required></div>
+        <div><label for="password">Password</label><div class="password-wrap"><input id="password" name="password" type="password" placeholder="Enter your password" autocomplete="current-password" required><button id="togglePassword" class="toggle-password secondary" type="button">Show</button></div></div>
+        <p id="loginError" class="auth-error" role="alert"></p>
+        <button class="primary wide" type="submit">Sign in</button>
+      </form>
+      <p class="auth-demo">Demo frontend login: <strong>admin</strong> / <strong>sentinal123</strong></p>
+    </div>
+  </section>
+
+  <main id="appScreen" class="shell hidden">
+    <header class="hero app-header">
+      <div><div class="badge">🛡️ SENTINAL</div><h2>Detect scams before you act.</h2><p>Screen URLs, emails and message transcripts for common phishing and scam signals.</p></div>
+      <div class="header-actions"><span id="loggedInUser" class="user-chip"></span><button id="logoutButton" class="secondary" type="button">Log out</button></div>
+    </header>
+    <section class="card">
+      <nav class="tabs" aria-label="Analyzer type">
+        <button class="tab active" data-type="url" type="button">🔗 URL</button><button class="tab" data-type="email" type="button">✉️ Email</button><button class="tab" data-type="message" type="button">💬 Message</button>
+      </nav>
+      <div id="urlPanel" class="panel active"><label for="urlInput">Website URL</label><div class="input-row"><input id="urlInput" placeholder="https://example.com/login" autocomplete="off"><button id="urlButton" class="primary" type="button">Analyze URL</button></div><p class="hint">Checks URL structure and suspicious characteristics. It does not visit the website and cannot guarantee safety.</p></div>
+      <div id="textPanel" class="panel"><label id="textLabel" for="textInput">Paste the message</label><textarea id="textInput" rows="11" placeholder="Paste the email, SMS/WhatsApp message, or call transcript here..."></textarea><button id="textButton" class="primary wide" type="button">Analyze</button></div>
+    </section>
+    <section id="result" class="result hidden" aria-live="polite"></section>
+    <section class="how card"><h2>How SENTINAL works</h2><div class="steps"><div><span>1</span><h3>Scan</h3><p>Paste a link or suspicious communication.</p></div><div><span>2</span><h3>Analyze</h3><p>Rules look for phishing, impersonation, urgency and payment signals.</p></div><div><span>3</span><h3>Explain</h3><p>Get a risk score and the reasons behind it.</p></div></div></section>
+    <footer><strong>Safety note:</strong> SENTINAL is a screening tool, not proof that a website, email or message is legitimate. Never share OTPs, passwords or banking details because someone asked you to.</footer>
+  </main>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+  <script>
+    (()=>{
+      const loginScreen=document.getElementById('loginScreen'),appScreen=document.getElementById('appScreen'),loginForm=document.getElementById('loginForm'),loginError=document.getElementById('loginError'),togglePassword=document.getElementById('togglePassword'),logoutButton=document.getElementById('logoutButton'),loggedInUser=document.getElementById('loggedInUser');
+      const DEMO_USERNAME='admin',DEMO_PASSWORD='sentinal123';
+      function clean(v){return v.trim().replace(/\s+/g,' ')}
+      function showApp(u){loginScreen.classList.add('hidden');appScreen.classList.remove('hidden');loggedInUser.textContent=`Signed in as ${u}`}
+      function showLogin(){appScreen.classList.add('hidden');loginScreen.classList.remove('hidden');loginForm.reset();loginError.textContent=''}
+      const saved=sessionStorage.getItem('sentinalUser');if(saved)showApp(saved);
+      loginForm.addEventListener('submit',e=>{e.preventDefault();const u=clean(document.getElementById('username').value),p=document.getElementById('password').value.trim();loginError.textContent='';if(!u||!p){loginError.textContent='Please enter both username and password.';return}if(u.toLowerCase()===DEMO_USERNAME&&p===DEMO_PASSWORD){sessionStorage.setItem('sentinalUser',u);showApp(u)}else loginError.textContent='Invalid username or password.'});
+      togglePassword.addEventListener('click',()=>{const i=document.getElementById('password'),visible=i.type==='text';i.type=visible?'password':'text';togglePassword.textContent=visible?'Show':'Hide'});
+      logoutButton.addEventListener('click',()=>{sessionStorage.removeItem('sentinalUser');showLogin()});
+      [document.getElementById('urlInput'),document.getElementById('textInput')].forEach(f=>f.addEventListener('blur',()=>{if(f.value)f.value=clean(f.value)}));
+    })();
+  </script>
+</body>
+</html>
