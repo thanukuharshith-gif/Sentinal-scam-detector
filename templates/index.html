@@ -1,63 +1,359 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>SENTINAL — Scam & Phishing Detector</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  <style>
-    .auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box}.auth-card{width:min(440px,100%)}.auth-card h1{margin-bottom:8px}.subtitle{margin-bottom:24px;opacity:.78}.auth-form{display:grid;gap:14px}.auth-form label{font-weight:600}.auth-form input{width:100%;box-sizing:border-box}.password-wrap{position:relative}.password-wrap input{padding-right:76px}.toggle-password{position:absolute;right:8px;top:50%;transform:translateY(-50%)}.auth-error{min-height:20px;margin:2px 0;color:#c0392b;font-size:.92rem}.auth-demo{margin-top:18px;font-size:.85rem;opacity:.7;text-align:center}.app-header{display:flex;justify-content:space-between;align-items:center;gap:16px}.header-actions{display:flex;align-items:center;gap:10px}.user-chip{font-size:.9rem;opacity:.8}.secondary{border:1px solid currentColor;background:transparent}.hidden{display:none!important}body{margin:0}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SENTINAL — URL Intelligence</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-  <section id="loginScreen" class="auth-screen">
-    <div class="card auth-card">
-      <header class="hero">
-        <div class="badge">🛡️ SENTINAL</div>
-        <h1>Welcome back</h1>
-        <p class="subtitle">Sign in to use the Scam &amp; Phishing Detector.</p>
-      </header>
-      <form id="loginForm" class="auth-form" novalidate>
-        <div><label for="username">Username</label><input id="username" name="username" type="text" placeholder="Enter your username" autocomplete="username" required></div>
-        <div><label for="password">Password</label><div class="password-wrap"><input id="password" name="password" type="password" placeholder="Enter your password" autocomplete="current-password" required><button id="togglePassword" class="toggle-password secondary" type="button">Show</button></div></div>
-        <p id="loginError" class="auth-error" role="alert"></p>
-        <button class="primary wide" type="submit">Sign in</button>
-      </form>
-      <p class="auth-demo">Demo frontend login: <strong>admin</strong> / <strong>sentinal123</strong></p>
-    </div>
-  </section>
-
-  <main id="appScreen" class="shell hidden">
-    <header class="hero app-header">
-      <div><div class="badge">🛡️ SENTINAL</div><h2>Detect scams before you act.</h2><p>Screen URLs, emails and message transcripts for common phishing and scam signals.</p></div>
-      <div class="header-actions"><span id="loggedInUser" class="user-chip"></span><button id="logoutButton" class="secondary" type="button">Log out</button></div>
+<div class="app-shell">
+    <header class="topbar">
+        <div class="brand">
+            <div class="brand-mark">✦</div>
+            <div>
+                <div class="brand-name">SENTINAL</div>
+                <div class="brand-sub">THREAT INTELLIGENCE</div>
+            </div>
+        </div>
+        <div class="crumbs">Workspace <span>/</span> URL Intelligence <span>/</span> <b>Dashboard</b></div>
+        <div class="top-status"><i></i> LIVE <span>•</span> Security Engine</div>
     </header>
-    <section class="card">
-      <nav class="tabs" aria-label="Analyzer type">
-        <button class="tab active" data-type="url" type="button">🔗 URL</button><button class="tab" data-type="email" type="button">✉️ Email</button><button class="tab" data-type="message" type="button">💬 Message</button>
-      </nav>
-      <div id="urlPanel" class="panel active"><label for="urlInput">Website URL</label><div class="input-row"><input id="urlInput" placeholder="https://example.com/login" autocomplete="off"><button id="urlButton" class="primary" type="button">Analyze URL</button></div><p class="hint">Checks URL structure and suspicious characteristics. It does not visit the website and cannot guarantee safety.</p></div>
-      <div id="textPanel" class="panel"><label id="textLabel" for="textInput">Paste the message</label><textarea id="textInput" rows="11" placeholder="Paste the email, SMS/WhatsApp message, or call transcript here..."></textarea><button id="textButton" class="primary wide" type="button">Analyze</button></div>
-    </section>
-    <section id="result" class="result hidden" aria-live="polite"></section>
-    <section class="how card"><h2>How SENTINAL works</h2><div class="steps"><div><span>1</span><h3>Scan</h3><p>Paste a link or suspicious communication.</p></div><div><span>2</span><h3>Analyze</h3><p>Rules look for phishing, impersonation, urgency and payment signals.</p></div><div><span>3</span><h3>Explain</h3><p>Get a risk score and the reasons behind it.</p></div></div></section>
-    <footer><strong>Safety note:</strong> SENTINAL is a screening tool, not proof that a website, email or message is legitimate. Never share OTPs, passwords or banking details because someone asked you to.</footer>
-  </main>
 
-  <script src="{{ url_for('static', filename='script.js') }}"></script>
-  <script>
-    (()=>{
-      const loginScreen=document.getElementById('loginScreen'),appScreen=document.getElementById('appScreen'),loginForm=document.getElementById('loginForm'),loginError=document.getElementById('loginError'),togglePassword=document.getElementById('togglePassword'),logoutButton=document.getElementById('logoutButton'),loggedInUser=document.getElementById('loggedInUser');
-      const DEMO_USERNAME='admin',DEMO_PASSWORD='sentinal123';
-      function clean(v){return v.trim().replace(/\s+/g,' ')}
-      function showApp(u){loginScreen.classList.add('hidden');appScreen.classList.remove('hidden');loggedInUser.textContent=`Signed in as ${u}`}
-      function showLogin(){appScreen.classList.add('hidden');loginScreen.classList.remove('hidden');loginForm.reset();loginError.textContent=''}
-      const saved=sessionStorage.getItem('sentinalUser');if(saved)showApp(saved);
-      loginForm.addEventListener('submit',e=>{e.preventDefault();const u=clean(document.getElementById('username').value),p=document.getElementById('password').value.trim();loginError.textContent='';if(!u||!p){loginError.textContent='Please enter both username and password.';return}if(u.toLowerCase()===DEMO_USERNAME&&p===DEMO_PASSWORD){sessionStorage.setItem('sentinalUser',u);showApp(u)}else loginError.textContent='Invalid username or password.'});
-      togglePassword.addEventListener('click',()=>{const i=document.getElementById('password'),visible=i.type==='text';i.type=visible?'password':'text';togglePassword.textContent=visible?'Show':'Hide'});
-      logoutButton.addEventListener('click',()=>{sessionStorage.removeItem('sentinalUser');showLogin()});
-      [document.getElementById('urlInput'),document.getElementById('textInput')].forEach(f=>f.addEventListener('blur',()=>{if(f.value)f.value=clean(f.value)}));
-    })();
-  </script>
+    <main class="content">
+        <section class="intro">
+            <div>
+                <div class="eyebrow">URL INTELLIGENCE / REAL-TIME ANALYSIS</div>
+                <h1>Investigate a website before you trust it.</h1>
+                <p>SENTINAL checks threat intelligence, trusted-domain verification, phishing heuristics and live technical evidence — then explains exactly why a URL is considered safe, suspicious or dangerous.</p>
+            </div>
+            <div class="scan-state"><span></span> ENGINE READY</div>
+        </section>
+
+        <section class="scanner">
+            <div class="scanner-label">TARGET URL</div>
+            <div class="scanner-row">
+                <input id="urlInput" type="url" placeholder="https://example.com" autocomplete="off">
+                <button id="analyzeBtn">ANALYZE URL <span>→</span></button>
+            </div>
+            <div class="scanner-hint">No login required • Analysis runs locally through the SENTINAL Flask engine</div>
+        </section>
+
+        <section class="metrics">
+            <article class="metric-card">
+                <div class="metric-top"><span>SECURITY POSTURE</span><b>◉</b></div>
+                <div class="metric-value" id="postureValue">—<small>/100</small></div>
+                <div class="metric-label">Current URL risk score</div>
+                <div class="metric-line"><i id="postureLine"></i></div>
+            </article>
+            <article class="metric-card">
+                <div class="metric-top"><span>ACTIVE THREATS</span><b class="red">!</b></div>
+                <div class="metric-value red-text" id="threatValue">0</div>
+                <div class="metric-label">High-severity indicators</div>
+                <div class="metric-foot red-text">• Monitoring</div>
+            </article>
+            <article class="metric-card">
+                <div class="metric-top"><span>URL SCANS</span><b>⌁</b></div>
+                <div class="metric-value" id="scanValue">0</div>
+                <div class="metric-label">Analysis operations this session</div>
+                <div class="metric-foot green-text">• Engine ready</div>
+            </article>
+            <article class="metric-card">
+                <div class="metric-top"><span>ENGINE STATUS</span><b class="green">✓</b></div>
+                <div class="metric-value green-text status-word">ONLINE</div>
+                <div class="metric-label">Heuristic detection engine</div>
+                <div class="metric-foot green-text">• Operational</div>
+            </article>
+        </section>
+
+        <section class="grid-two">
+            <article class="panel activity-panel">
+                <div class="panel-head">
+                    <div><span class="eyebrow">DETECTION OVERVIEW</span><h2>URL Threat Activity</h2></div>
+                    <span class="session-tag">SESSION</span>
+                </div>
+                <div class="chart" id="chart"></div>
+                <div class="chart-labels"><span>START</span><span>ANALYSIS ACTIVITY</span><span>NOW</span></div>
+            </article>
+
+            <article class="panel posture-panel">
+                <div class="panel-head">
+                    <div><span class="eyebrow">RISK DISTRIBUTION</span><h2>Threat Posture</h2></div>
+                </div>
+                <div class="distribution">
+                    <div class="donut"><strong id="donutScore">0%</strong><small>THREAT</small></div>
+                    <div class="legend">
+                        <div><i class="critical"></i><span>Critical</span><b id="criticalCount">0</b></div>
+                        <div><i class="high"></i><span>High Risk</span><b id="highCount">0</b></div>
+                        <div><i class="medium"></i><span>Suspicious</span><b id="suspiciousCount">0</b></div>
+                        <div><i class="low"></i><span>Low Risk</span><b id="lowCount">0</b></div>
+                    </div>
+                </div>
+            </article>
+        </section>
+
+        <section class="grid-results">
+            <article class="panel result-panel">
+                <div class="panel-head">
+                    <div><span class="eyebrow">LIVE INVESTIGATION</span><h2>Latest URL Result</h2></div>
+                    <span id="resultBadge" class="risk-badge neutral">AWAITING SCAN</span>
+                </div>
+
+                <div id="emptyResult" class="empty">
+                    <div class="empty-icon">⌁</div>
+                    <h3>Run an analysis to see the evidence.</h3>
+                    <p>SENTINAL will show the decision path, risk score, detection signals, technical observations and the reasons behind the verdict.</p>
+                </div>
+
+                <div id="resultContent" class="hidden">
+                    <div class="result-summary">
+                        <div>
+                            <span class="eyebrow">ANALYZED DESTINATION</span>
+                            <div class="target" id="resultUrl">—</div>
+                            <div class="result-message" id="resultMessage">—</div>
+                        </div>
+                        <div class="score-box">
+                            <span>RISK SCORE</span>
+                            <strong id="resultScore">0</strong><small>/100</small>
+                        </div>
+                    </div>
+
+                    <div class="decision-path">
+                        <div class="path-title">SENTINAL DECISION PATH</div>
+                        <div class="path-row">
+                            <div class="path-node" id="stageThreat"><b>01</b><span>Threat DB</span><em>—</em></div>
+                            <div class="path-arrow">→</div>
+                            <div class="path-node" id="stageTrust"><b>02</b><span>Trusted Domain</span><em>—</em></div>
+                            <div class="path-arrow">→</div>
+                            <div class="path-node" id="stageDeep"><b>03</b><span>Deep Analysis</span><em>—</em></div>
+                            <div class="path-arrow">→</div>
+                            <div class="path-node final" id="stageVerdict"><b>04</b><span>Evidence Engine</span><em>—</em></div>
+                        </div>
+                    </div>
+
+                    <div class="section-title">WHY SENTINAL GAVE THIS VERDICT</div>
+                    <div id="signals" class="signals"></div>
+
+                    <div class="section-title">EVIDENCE COLLECTED</div>
+                    <div id="evidence" class="evidence-grid"></div>
+
+                    <div class="section-title">TECHNICAL INTELLIGENCE</div>
+                    <div id="technical" class="technical-grid"></div>
+
+                    <div class="recommendation" id="recommendation"></div>
+                </div>
+            </article>
+
+            <article class="panel recent-panel">
+                <div class="panel-head">
+                    <div><span class="eyebrow">OPERATIONS</span><h2>Recent Scans</h2></div>
+                    <button class="clear-btn" id="clearBtn">Clear</button>
+                </div>
+                <div id="recentList" class="recent-list">
+                    <div class="recent-empty">No scans yet.</div>
+                </div>
+            </article>
+        </section>
+    </main>
+
+    <footer>
+        <span>SENTINAL URL INTELLIGENCE</span>
+        <span>Explainable security analysis • Hackathon build</span>
+    </footer>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let scans = [];
+let counts = {critical:0, high:0, suspicious:0, low:0};
+let chartValues = Array.from({length: 18}, () => Math.floor(Math.random()*28)+8);
+
+function setStage(id, value, state) {
+    const el = $(id);
+    el.className = "path-node " + (state || "");
+    el.querySelector("em").textContent = value || "—";
+}
+
+function escapeHtml(value) {
+    return String(value ?? "").replace(/[&<>"']/g, ch => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+    }[ch]));
+}
+
+function renderChart() {
+    const chart = $("chart");
+    const max = Math.max(...chartValues, 1);
+    chart.innerHTML = chartValues.map(v =>
+        `<i style="height:${Math.max(12, (v/max)*88)}%"></i>`
+    ).join("");
+}
+
+function riskClass(risk) {
+    if (risk === "High Risk") return "high";
+    if (risk === "Suspicious") return "medium";
+    if (risk === "Low Risk" || risk === "Verified Official") return "low";
+    return "neutral";
+}
+
+function updateDistribution() {
+    $("criticalCount").textContent = counts.critical;
+    $("highCount").textContent = counts.high;
+    $("suspiciousCount").textContent = counts.suspicious;
+    $("lowCount").textContent = counts.low;
+    const total = counts.critical + counts.high + counts.suspicious + counts.low;
+    $("donutScore").textContent = total ? Math.round(((counts.critical + counts.high) / total) * 100) + "%" : "0%";
+}
+
+function renderRecent() {
+    if (!scans.length) {
+        $("recentList").innerHTML = '<div class="recent-empty">No scans yet.</div>';
+        return;
+    }
+    $("recentList").innerHTML = scans.slice(0, 7).map((s, i) => `
+        <button class="recent-row" onclick="showScan(${i})">
+            <span class="recent-domain">${escapeHtml(s.domain)}</span>
+            <span class="recent-risk ${riskClass(s.risk)}">${escapeHtml(s.risk)}</span>
+            <span class="recent-score">${s.score}</span>
+            <span class="recent-time">${escapeHtml(s.time)}</span>
+        </button>
+    `).join("");
+}
+
+function showScan(index) {
+    displayResult(scans[index]);
+}
+
+function displayResult(data) {
+    $("emptyResult").classList.add("hidden");
+    $("resultContent").classList.remove("hidden");
+
+    $("resultBadge").textContent = data.risk.toUpperCase();
+    $("resultBadge").className = "risk-badge " + riskClass(data.risk);
+    $("resultUrl").textContent = data.url;
+    $("resultMessage").textContent = data.message;
+    $("resultScore").textContent = data.score;
+    $("postureValue").innerHTML = `${data.score}<small>/100</small>`;
+    $("postureLine").style.width = `${data.score}%`;
+    $("threatValue").textContent = data.signals.filter(s => s.severity === "critical" || s.severity === "high").length;
+    $("scanValue").textContent = scans.length;
+
+    setStage("stageThreat", data.stages.threat_db, data.stages.threat_db === "MATCH" ? "danger" : "safe");
+    setStage("stageTrust", data.stages.trusted_domain, data.stages.trusted_domain === "EXACT MATCH" ? "safe" : "warning");
+    setStage("stageDeep", data.stages.deep_analysis, data.stages.deep_analysis === "COMPLETED" ? "active" : "safe");
+    setStage("stageVerdict", data.risk, riskClass(data.risk));
+
+    $("signals").innerHTML = data.signals.map((s, i) => `
+        <div class="signal ${s.severity}">
+            <div class="signal-num">${String(i+1).padStart(2,"0")}</div>
+            <div class="signal-main">
+                <strong>${escapeHtml(s.title)}</strong>
+                <p>${escapeHtml(s.detail)}</p>
+            </div>
+            <div class="signal-points">${s.points ? "+"+s.points : "INFO"}</div>
+        </div>
+    `).join("");
+
+    $("evidence").innerHTML = data.evidence.map(e => `
+        <div class="evidence-card ${e.status}">
+            <span>${escapeHtml(e.label)}</span>
+            <strong>${escapeHtml(e.value)}</strong>
+            <p>${escapeHtml(e.detail)}</p>
+        </div>
+    `).join("");
+
+    const t = data.technical || {};
+    const tech = [
+        ["Hostname", data.domain || "—"],
+        ["Reachable", t.reachable ? "Yes" : "No"],
+        ["HTTP Status", t.http_status ?? "—"],
+        ["Redirects", t.redirects ?? "—"],
+        ["Page Title", t.title || "Not available"],
+        ["Forms", t.forms ?? "—"],
+        ["Links", t.links ?? "—"],
+        ["Resolved IP", (t.ip_addresses || []).slice(0,2).join(", ") || "Not resolved"],
+        ["TLS", t.tls?.enabled ? "Negotiated" : "Not verified"],
+        ["Server", t.server || "Not disclosed"],
+    ];
+    $("technical").innerHTML = tech.map(([k,v]) => `
+        <div><span>${escapeHtml(k)}</span><b>${escapeHtml(v)}</b></div>
+    `).join("");
+
+    let recommendation = "";
+    if (data.risk === "High Risk") {
+        recommendation = `<b>RECOMMENDATION: DO NOT PROCEED</b><span>Do not enter passwords, payment information, OTPs or personal data. If you reached this URL from a message, verify the sender and visit the official site by typing its known address manually.</span>`;
+    } else if (data.risk === "Suspicious") {
+        recommendation = `<b>RECOMMENDATION: VERIFY BEFORE TRUSTING</b><span>Do not submit sensitive information until the domain owner is independently confirmed. Suspicious signals can be legitimate in isolation, but their combination deserves caution.</span>`;
+    } else {
+        recommendation = `<b>RECOMMENDATION: LOW OBSERVED RISK</b><span>The current checks found no strong malicious indicators. A low score is not a guarantee of safety, so continue normal browsing precautions.</span>`;
+    }
+    $("recommendation").innerHTML = recommendation;
+}
+
+async function analyze() {
+    const url = $("urlInput").value.trim();
+    if (!url) {
+        $("urlInput").focus();
+        return;
+    }
+
+    const btn = $("analyzeBtn");
+    btn.disabled = true;
+    btn.innerHTML = "ANALYZING <span class='spinner'></span>";
+
+    try {
+        const response = await fetch("/api/analyze", {
+            method: "POST",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify({url})
+        });
+        const data = await response.json();
+        if (!response.ok || data.status === "error") throw new Error(data.error || "Analysis failed.");
+
+        const now = new Date();
+        data.time = now.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
+        scans.unshift(data);
+        const r = riskClass(data.risk);
+        if (r === "high") counts.high++;
+        else if (r === "medium") counts.suspicious++;
+        else if (r === "low") counts.low++;
+        else counts.critical += data.signals?.filter(s => s.severity === "critical").length || 0;
+
+        chartValues.push(Math.max(5, data.score));
+        chartValues = chartValues.slice(-18);
+        renderChart();
+        updateDistribution();
+        renderRecent();
+        displayResult(data);
+    } catch (err) {
+        $("resultBadge").textContent = "ERROR";
+        $("resultBadge").className = "risk-badge high";
+        $("emptyResult").classList.remove("hidden");
+        $("resultContent").classList.add("hidden");
+        $("emptyResult").innerHTML = `<div class="empty-icon">!</div><h3>Analysis failed.</h3><p>${escapeHtml(err.message)}</p>`;
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = "ANALYZE URL <span>→</span>";
+    }
+}
+
+$("analyzeBtn").addEventListener("click", analyze);
+$("urlInput").addEventListener("keydown", e => { if (e.key === "Enter") analyze(); });
+$("clearBtn").addEventListener("click", () => {
+    scans = [];
+    counts = {critical:0, high:0, suspicious:0, low:0};
+    $("scanValue").textContent = "0";
+    $("threatValue").textContent = "0";
+    $("postureValue").innerHTML = "—<small>/100</small>";
+    $("postureLine").style.width = "0%";
+    $("emptyResult").classList.remove("hidden");
+    $("resultContent").classList.add("hidden");
+    $("resultBadge").textContent = "AWAITING SCAN";
+    $("resultBadge").className = "risk-badge neutral";
+    renderRecent();
+    updateDistribution();
+});
+renderChart();
+</script>
 </body>
 </html>

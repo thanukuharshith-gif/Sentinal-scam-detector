@@ -84,3 +84,4 @@ python app.py
 The browser never receives the API key. If the key is missing or the provider is unavailable, PhishGuard falls back to local heuristics instead of failing the scan.
 
 **Privacy:** because `urls.search` sends the actual URL to Google, do not enable this provider for sensitive/private URLs unless you are comfortable with that disclosure.
+"# Sentinal" 
